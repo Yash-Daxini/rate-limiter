@@ -1,6 +1,6 @@
 import { createClient, RedisClientType } from 'redis';
-import dotenv from 'dotenv';
-dotenv.config();
+import * as dotenv from "dotenv";
+dotenv.config({ path: __dirname+'/.env' });
 
 export class RedisDataStore {
     private client: RedisClientType;
@@ -18,11 +18,14 @@ export class RedisDataStore {
     }
 
     public async get(key: string): Promise<string | null> {
-
         return await this.client.get(key);
     }
 
-    public async set(key: string, value: string, expirationInSeconds?: number): Promise<void> {
+    public async increment(key: string): Promise<void> {
+        await this.client.incr(key);
+    }
+
+    public async set(key: string, value: number, expirationInSeconds?: number): Promise<void> {
         if (expirationInSeconds) {
             await this.client.set(key, value, { EX: expirationInSeconds });
         } else {
