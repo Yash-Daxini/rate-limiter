@@ -1,48 +1,67 @@
-import { createClient, RedisClientType } from 'redis';
 import * as dotenv from "dotenv";
-dotenv.config({ path: __dirname+'/.env' });
+import Redis from 'ioredis';
+dotenv.config({ path: __dirname + '/.env' });
 
-export class RedisDataStore {
-    private client: RedisClientType;
-    constructor() {
-        this.client = createClient({
-            url: process.env.REDIS_URL
-        });
-        this.client.on('error', (err: unknown) => {
-            console.error('Redis Client Error', err);
-        });
+export default class RedisClient {
+    private static instance: Redis | null = null;
+
+    private constructor() { }
+
+    private static getInstance(): Redis {
+        if (!this.instance) {
+            this.instance = new Redis({
+                host: process.env.REDIS_HOST || 'localhost',
+                port: Number(process.env.REDIS_PORT) || 6379,
+            });
+
+            this.instance.on("error", (err) => {
+                console.error("Redis error: ", err);
+            });
+        }
+        return this.instance;
     }
 
-    public async connect(): Promise<void> {
-        await this.client.connect();
+    public static async connect(): Promise<void> {
+        const redis = this.getInstance();
+        await redis.connect();
     }
 
-    public async get(key: string): Promise<string | null> {
-        return await this.client.get(key);
+    public static async get(key: string): Promise<string | null> {
+        const redis = this.getInstance();
+        return await redis.get(key);
     }
 
-    public async increment(key: string): Promise<void> {
-        await this.client.incr(key);
+    public static async increment(key: string): Promise<void> {
+        const redis = this.getInstance();
+        await redis.incr(key);
     }
 
-    public async set(key: string, value: number, expirationInSeconds?: number): Promise<void> {
+    public static async set(key: string, value: number | string, expirationInSeconds?: number): Promise<void> {
+        const redis = this.getInstance();
         if (expirationInSeconds) {
-            await this.client.set(key, value, { EX: expirationInSeconds });
+            await redis.set(key, value, 'EX', expirationInSeconds);
         } else {
-            await this.client.set(key, value);
+            await redis.set(key, value);
         }
     }
 
-    public async delete(key: string): Promise<void> {
-        await this.client.del(key);
+    public static async delete(key: string): Promise<void> {
+        const redis = this.getInstance();
+        await redis.del(key);
     }
 
-    public async exists(key: string): Promise<boolean> {
-        const result = await this.client.exists(key);
+    public static async exists(key: string): Promise<boolean> {
+        const redis = this.getInstance();
+        const result = await redis.exists(key);
         return result === 1;
     }
 
-    public async disconnect(): Promise<void> {
-        await this.client.disconnect();
+    public static async disconnect(): Promise<void> {
+        const redis = this.getInstance();
+        if (redis) {
+            await redis.quit();
+            redis.disconnect();
+            this.instance = null;
+        }
     }
 }

@@ -6,7 +6,7 @@ import { RateLimitLevel } from './src/enums/RateLimitLevel';
 
 const app: Application = express();
 
-const rateLimiterConfig: RateLimiterConfig = new RateLimiterConfig(10, 0, RateLimitStrategy.NonBurstRateLimiter, RateLimitLevel.User);
+const rateLimiterConfig: RateLimiterConfig = new RateLimiterConfig(2, 0, RateLimitStrategy.NonBurstRateLimiter, RateLimitLevel.User);
 
 app.use(rateLimiterMiddleware(rateLimiterConfig));
 

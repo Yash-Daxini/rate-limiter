@@ -2,9 +2,7 @@ import { BurstRateLimiter } from "../entity/BurstRateLimiter";
 import { NonBurstRateLimiter } from "../entity/NonBurstRateLimiter";
 import { RateLimiterConfig } from "../entity/ratelimiterConfig";
 import { RateLimitStrategy } from "../enums/RateLimitStrategy";
-import { RedisDataStore } from "./redisService";
-
-const redis = new RedisDataStore();
+import RedisClient from "./redisService";
 
 export const userLevelRateLimiterService = async (config: RateLimiterConfig, userId: string | undefined): Promise<boolean> => {
 
@@ -25,23 +23,18 @@ const handleNonBurstRateLimiter = async (config: RateLimiterConfig, userId: stri
     const currentSecond = Math.floor(Date.now() / 1000);
     const key = `rate_limit:${userId}:${currentSecond}`;
 
-    redis.connect();
 
-    if (! await redis.exists(key)) {
-        await redis.set(key, nonBurstRateLimiter.maxRequestPerSecond, 1);
+    if (! await RedisClient.exists(key)) {
+        await RedisClient.set(key, 1, 1);
+        console.warn("Not exists");
         return true;
     }
 
-    const acceptedRequestCount = +redis.get(userId);
+    const acceptedRequestCount = new Number(await RedisClient.get(key));
 
-    const canAcceptRequest = nonBurstRateLimiter.canAccectRequest(acceptedRequestCount);
-
-    await redis.increment(userId);
-
-    await redis.disconnect();
-
+    const canAcceptRequest = nonBurstRateLimiter.canAccectRequest(acceptedRequestCount as number);
+    await RedisClient.increment(key);
     return canAcceptRequest;
-
 }
 
 const handleBurstRateLimiter = (config: RateLimiterConfig, userId: string): boolean => {
