@@ -36,6 +36,16 @@ export default class RedisClient {
         await redis.incr(key);
     }
 
+    public static async incrementBy(key: string, value: number): Promise<void> {
+        const redis = this.getInstance();
+        await redis.incrby(key, value);
+    }
+
+    public static async decrement(key: string): Promise<void> {
+        const redis = this.getInstance();
+        await redis.decr(key);
+    }
+
     public static async set(key: string, value: number | string, expirationInSeconds?: number): Promise<void> {
         const redis = this.getInstance();
         if (expirationInSeconds) {

@@ -26,7 +26,6 @@ const handleNonBurstRateLimiter = async (config: RateLimiterConfig, userId: stri
 
     if (! await RedisClient.exists(key)) {
         await RedisClient.set(key, 1, 1);
-        console.warn("Not exists");
         return true;
     }
 
@@ -37,7 +36,24 @@ const handleNonBurstRateLimiter = async (config: RateLimiterConfig, userId: stri
     return canAcceptRequest;
 }
 
-const handleBurstRateLimiter = (config: RateLimiterConfig, userId: string): boolean => {
+const handleBurstRateLimiter = async (config: RateLimiterConfig, userId: string): Promise<boolean> => {
     const burstRateLimiter = new BurstRateLimiter(config.maxRequest, config.rateLimitLevel, config.burstCapacity as number);
-    return false;
+
+    const currentSecond = Math.floor(Date.now() / 1000);
+    const key = `rate_limit:${userId}:${currentSecond}`;
+
+    if (! await RedisClient.exists(key)) {
+        await RedisClient.set(key, burstRateLimiter.maxRequestPerSecond-1);
+        return true;
+    }
+
+    setInterval(async () => {
+        await RedisClient.incrementBy(key, burstRateLimiter.maxRequestPerSecond);
+    }, 1000);
+
+    const acceptedRequestCount = new Number(await RedisClient.get(key));
+
+    const canAcceptRequest = burstRateLimiter.canAccectRequest(acceptedRequestCount as number);
+    await RedisClient.decrement(key);
+    return canAcceptRequest;
 }
