@@ -7,4 +7,7 @@ export class BurstRateLimiter extends RateLimiter {
         super(maxRequestPerSecond, level);
         this.burstCapacity = burstCapacity;
     }
+    public canAccectRequest = (currentBurstCapacity: number): boolean => {
+        return currentBurstCapacity > 1;
+    }
 }

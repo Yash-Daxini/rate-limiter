@@ -31,6 +31,11 @@ export default class RedisClient {
         return await redis.get(key);
     }
 
+    public static async keys(pattern: string): Promise<string[]> {
+        const redis = this.getInstance();
+        return await redis.keys(pattern);
+    }
+
     public static async increment(key: string): Promise<void> {
         const redis = this.getInstance();
         await redis.incr(key);

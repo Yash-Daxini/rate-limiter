@@ -11,7 +11,5 @@ export abstract class RateLimiter {
     public isUserLevel = (): boolean => this.level == RateLimitLevel.User;
     public isIPLevel = (): boolean => this.level == RateLimitLevel.IP;
     public isServiceLevel = (): boolean => this.level == RateLimitLevel.Service;
-    public canAccectRequest = (acceptedRequestCount: number): boolean => {
-        return acceptedRequestCount < this.maxRequestPerSecond;
-    }
+    public abstract canAccectRequest(acceptedRequestCount: number): boolean;
 }
