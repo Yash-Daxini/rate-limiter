@@ -19,7 +19,7 @@ export const userLevelRateLimiterService = async (config: RateLimiterConfig, use
 const handleNonBurstRateLimiter = async (config: RateLimiterConfig, userId: string): Promise<boolean> => {
     const nonBurstRateLimiter = new NonBurstRateLimiter(config.maxRequest, config.rateLimitLevel);
 
-    const key = `rate_limit:${userId}`;
+    const key = `rate_limit_nonBurst:${userId}`;
 
 
     if (! await RedisClient.exists(key)) {
@@ -41,16 +41,14 @@ const handleNonBurstRateLimiter = async (config: RateLimiterConfig, userId: stri
 const handleBurstRateLimiter = async (config: RateLimiterConfig, userId: string): Promise<boolean> => {
     const burstRateLimiter = new BurstRateLimiter(config.maxRequest, config.rateLimitLevel, config.burstCapacity as number);
 
-    const key = `rate_limit:${userId}`;
+    const key = `rate_limit_burst:${userId}`;
 
     if (!await RedisClient.exists(key)) {
-        await RedisClient.set(key, burstRateLimiter.maxRequestPerSecond - 1);
-        return true;
+        await RedisClient.set(key, 0);
+        return false;
     }
 
     let currentBurstCapacity: number = new Number(await RedisClient.get(key)) as number;
-
-    console.warn(currentBurstCapacity);
 
     const canAcceptRequest = burstRateLimiter.canAccectRequest(currentBurstCapacity);
 
@@ -63,7 +61,7 @@ const handleBurstRateLimiter = async (config: RateLimiterConfig, userId: string)
 
 export const startTokenRefill = (config: RateLimiterConfig) => {
     setInterval(async () => {
-        const keys = await RedisClient.keys('rate_limit:*');
+        const keys = await RedisClient.keys('rate_limit_burst:*');
         for (const key of keys) {
             const burstRateLimiter = new BurstRateLimiter(config.maxRequest, config.rateLimitLevel, config.burstCapacity as number);
             let currentBurst = new Number(await RedisClient.get(key)) as number;

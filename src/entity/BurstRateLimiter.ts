@@ -8,6 +8,6 @@ export class BurstRateLimiter extends RateLimiter {
         this.burstCapacity = burstCapacity;
     }
     public canAccectRequest = (currentBurstCapacity: number): boolean => {
-        return currentBurstCapacity > 1;
+        return currentBurstCapacity > 0;
     }
 }

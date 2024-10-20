@@ -7,20 +7,19 @@ import { startTokenRefill } from './src/services/userlevelRateLimiterService';
 
 const app: Application = express();
 
-const rateLimiterConfigForNonBurst: RateLimiterConfig = new RateLimiterConfig(10, 0, RateLimitStrategy.NonBurstRateLimiter, RateLimitLevel.User);
+const rateLimiterConfigForNonBurst: RateLimiterConfig = new RateLimiterConfig(20, 0, RateLimitStrategy.NonBurstRateLimiter, RateLimitLevel.User);
 
-const rateLimiterConfigForBurst: RateLimiterConfig = new RateLimiterConfig(2, 5, RateLimitStrategy.BurstRateLimiter, RateLimitLevel.User);
+const rateLimiterConfigForBurst: RateLimiterConfig = new RateLimiterConfig(10, 50, RateLimitStrategy.BurstRateLimiter, RateLimitLevel.User);
 
-// app.use(rateLimiterMiddleware(rateLimiterConfigForBurst));
+startTokenRefill(rateLimiterConfigForBurst);
 
 app.get("/burst", rateLimiterMiddleware(rateLimiterConfigForBurst), (req, res) => {
-    res.send("Hey");
+    res.send({ res: "Accepted" });
 })
 
 app.get("/nonBurst", rateLimiterMiddleware(rateLimiterConfigForNonBurst), (req, res) => {
-    res.send("Hey");
+    res.send({ res: "Accepted" });
 })
 
-startTokenRefill(rateLimiterConfigForBurst);
 
 app.listen(3000, () => console.warn("Server is listening on 3000"))
