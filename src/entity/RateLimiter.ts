@@ -3,13 +3,13 @@ import { RateLimitLevel } from "../enums/RateLimitLevel";
 export abstract class RateLimiter {
     maxRequestPerSecond: number;
     level: RateLimitLevel;
-    constructor(maxRequestPerSecond: number, level: RateLimitLevel) {
+    constructor(maxRequestPerSecond: number, rateLimitLevel: RateLimitLevel) {
         this.maxRequestPerSecond = maxRequestPerSecond;
-        this.level = level;
+        this.level = rateLimitLevel;
     }
 
     public isUserLevel = (): boolean => this.level == RateLimitLevel.User;
     public isIPLevel = (): boolean => this.level == RateLimitLevel.IP;
     public isServiceLevel = (): boolean => this.level == RateLimitLevel.Service;
-    public abstract canAccectRequest(acceptedRequestCount: number): boolean;
+    public abstract isRequestAvailable(acceptedRequestCount: number): boolean;
 }

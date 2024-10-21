@@ -1,8 +1,8 @@
-import { RateLimiterConfig } from "./entity/ratelimiterConfig";
-import { RateLimitLevel } from "./enums/RateLimitLevel";
+import { RateLimiterConfig } from "../entity/RatelimiterConfig";
+import { RateLimitLevel } from "../enums/RateLimitLevel";
 import { Request, Response, NextFunction } from 'express';
-import { userLevelRateLimiterService } from "./services/userlevelRateLimiterService";
-import { HEADER_USER_ID } from "./constants/headerConstants";
+import { userLevelRateLimiterService } from "../services/UserlevelRateLimiterService";
+import { HEADER_USER_ID } from "../constants/HeaderConstants";
 
 export const rateLimiterMiddleware = (config: RateLimiterConfig): any => {
     return async (req: Request, res: Response, next: NextFunction) => {
