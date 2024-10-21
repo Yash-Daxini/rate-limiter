@@ -11,7 +11,7 @@ const rateLimiterConfigForNonBurst: RateLimiterConfig = new RateLimiterConfig(20
 
 const rateLimiterConfigForBurst: RateLimiterConfig = new RateLimiterConfig(10, 50, RateLimitStrategy.BurstRateLimiter, RateLimitLevel.User);
 
-startTokenRefill(rateLimiterConfigForBurst);
+// startTokenRefill(rateLimiterConfigForBurst);
 
 app.get("/burst", rateLimiterMiddleware(rateLimiterConfigForBurst), (req, res) => {
     res.send({ res: "Accepted" });

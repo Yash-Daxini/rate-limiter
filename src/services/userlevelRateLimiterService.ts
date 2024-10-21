@@ -44,16 +44,28 @@ const handleBurstRateLimiter = async (config: RateLimiterConfig, userId: string)
     const key = `rate_limit_burst:${userId}`;
 
     if (!await RedisClient.exists(key)) {
-        await RedisClient.set(key, 0);
-        return false;
+        await RedisClient.set(key, JSON.stringify({
+            burstCapacity: burstRateLimiter.maxRequestPerSecond - 1,
+            lastRequestTimeStamp: Date.now()
+        }));
+        return true;
     }
 
-    let currentBurstCapacity: number = new Number(await RedisClient.get(key)) as number;
+    let value = JSON.parse(await RedisClient.get(key) as string);
+
+    let currentBurstCapacity: number = new Number(value.burstCapacity) as number;
+
+    currentBurstCapacity += Math.floor((Date.now() - value.lastRequestTimeStamp) / 1000) * burstRateLimiter.maxRequestPerSecond;
+
+    currentBurstCapacity = Math.min(currentBurstCapacity, burstRateLimiter.burstCapacity);
 
     const canAcceptRequest = burstRateLimiter.canAccectRequest(currentBurstCapacity);
 
     if (canAcceptRequest) {
-        await RedisClient.decrement(key);
+        await RedisClient.set(key, JSON.stringify({
+            burstCapacity: currentBurstCapacity - 1,
+            lastRequestTimeStamp: Date.now()
+        }));
     }
 
     return canAcceptRequest;
