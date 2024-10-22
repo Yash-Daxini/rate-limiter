@@ -2,7 +2,7 @@ import { RateLimiterConfig } from "../entity/RatelimiterConfig";
 import { RateLimitLevel } from "../enums/RateLimitLevel";
 import { Request, Response, NextFunction } from 'express';
 import { RateLimiterService } from "../services/RateLimiterService";
-import { HEADER_IP_ADDRESS, HEADER_USER_ID } from "../constants/HeaderConstants";
+import { HEADER_IP_ADDRESS, HEADER_SERVICE_NAME, HEADER_USER_ID } from "../constants/HeaderConstants";
 
 export const rateLimiterMiddleware = (config: RateLimiterConfig): any => {
     return async (req: Request, res: Response, next: NextFunction) => {
@@ -18,6 +18,8 @@ export const rateLimiterMiddleware = (config: RateLimiterConfig): any => {
                 break;
 
             case RateLimitLevel.Service:
+                const serviceName = req.headers[HEADER_SERVICE_NAME];
+                canAcceptRequest = await RateLimiterService(config, serviceName?.toLocaleString());
                 break;
         }
         if (!canAcceptRequest)
