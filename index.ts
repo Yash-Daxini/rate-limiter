@@ -14,7 +14,7 @@ app.get("/burst", rateLimiterMiddleware(rateLimiterConfigForBurst), (req, res) =
     res.send({ res: "Accepted" });
 })
 
-app.get("/nonBurst", rateLimiterMiddleware(rateLimiterConfigForNonBurst), (req, res) => {
+app.get("/nonBurst", rateLimiterMiddleware(), (req, res) => {
     res.send({ res: "Accepted" });
 })
 

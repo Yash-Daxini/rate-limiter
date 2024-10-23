@@ -3,9 +3,18 @@ import { RateLimitLevel } from "../enums/RateLimitLevel";
 import { Request, Response, NextFunction } from 'express';
 import { RateLimiterService } from "../services/RateLimiterService";
 import { HEADER_IP_ADDRESS, HEADER_SERVICE_NAME, HEADER_USER_ID } from "../constants/HeaderConstants";
+import { defaultIPLevelConfig, defaultServcieLevelConfig, defaultUserLevelConfig } from "../config/globalConfig";
 
-export const rateLimiterMiddleware = (config: RateLimiterConfig): any => {
+export const rateLimiterMiddleware = (config?: RateLimiterConfig | null): any => {
     return async (req: Request, res: Response, next: NextFunction) => {
+
+        if (config === undefined) {
+            config = getDefaultConfiguration(req);
+        }
+
+        if (config === null)
+            return false;
+
         let canAcceptRequest: Boolean = false;
 
         switch (config.rateLimitLevel) {
@@ -27,4 +36,16 @@ export const rateLimiterMiddleware = (config: RateLimiterConfig): any => {
 
         next();
     };
+}
+
+const getDefaultConfiguration = (req: Request): RateLimiterConfig | null => {
+    if (req.headers[HEADER_USER_ID])
+        return defaultUserLevelConfig;
+    else if (req.headers[HEADER_IP_ADDRESS])
+        return defaultIPLevelConfig
+    else if (req.headers[HEADER_SERVICE_NAME])
+        return defaultServcieLevelConfig;
+    else
+        return null;
+
 }
