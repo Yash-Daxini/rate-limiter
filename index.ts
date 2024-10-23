@@ -18,4 +18,4 @@ app.get("/nonBurst", rateLimiterMiddleware(rateLimiterConfigForNonBurst), (req, 
     res.send({ res: "Accepted" });
 })
 
-app.listen(3000, () => console.warn("Server is listening on 3000"))
+app.listen({ port: 3000, host: '0.0.0.0' }, () => console.warn("Server is listening on 3000"))
