@@ -8,7 +8,7 @@ export class BurstRateLimiterService implements IRateLimiterService {
             await RedisClient.set(key, JSON.stringify({
                 burstCapacity: burstRateLimiter.maxRequestPerSecond - 1,
                 lastRequestTimeStamp: Date.now()
-            }));
+            }), burstRateLimiter.burstCapacityExpiryInSeconds);
             return true;
         }
 
@@ -26,7 +26,7 @@ export class BurstRateLimiterService implements IRateLimiterService {
             await RedisClient.set(key, JSON.stringify({
                 burstCapacity: currentBurstCapacity - 1,
                 lastRequestTimeStamp: Date.now()
-            }));
+            }), burstRateLimiter.burstCapacityExpiryInSeconds);
         }
 
         return canAcceptRequest;

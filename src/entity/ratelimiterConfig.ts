@@ -6,10 +6,12 @@ export class RateLimiterConfig {
     burstCapacity: number | null;
     rateLimitStrategy: RateLimitStrategy
     rateLimitLevel: RateLimitLevel;
-    constructor(maxRequest: number, burstCapacity: number, rateLimitStrategy: RateLimitStrategy, rateLimiterLevel: RateLimitLevel) {
+    burstCapacityExpiryInSeconds: number | null;
+    constructor(maxRequest: number, burstCapacity: number, rateLimitStrategy: RateLimitStrategy, rateLimiterLevel: RateLimitLevel, burstCapacityExpiryInSeconds: number) {
         this.maxRequest = maxRequest;
         this.burstCapacity = burstCapacity;
         this.rateLimitStrategy = rateLimitStrategy
         this.rateLimitLevel = rateLimiterLevel;
+        this.burstCapacityExpiryInSeconds = burstCapacityExpiryInSeconds;
     }
 }

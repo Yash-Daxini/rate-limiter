@@ -27,7 +27,7 @@ const handleNonBurstRateLimiter = async (config: RateLimiterConfig, key: string)
 }
 
 const handleBurstRateLimiter = async (config: RateLimiterConfig, key: string): Promise<boolean> => {
-    const burstRateLimiter = new BurstRateLimiter(config.maxRequest, config.rateLimitLevel, config.burstCapacity as number);
+    const burstRateLimiter = new BurstRateLimiter(config.maxRequest, config.rateLimitLevel, config.burstCapacity as number, config.burstCapacityExpiryInSeconds as number);
 
     const redisKey = `rate_limit_burst:${key}`;
 
