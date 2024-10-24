@@ -2,17 +2,19 @@ import { IRateLimiterService } from "../contracts/IRateLimiterService";
 import { BurstRateLimiter } from "../entity/BurstRateLimiter";
 import RedisClient from "./RedisService";
 
+let redis = RedisClient.getInstance();
+
 export class BurstRateLimiterService implements IRateLimiterService {
     async canAcceptRequest(burstRateLimiter: BurstRateLimiter, key: string): Promise<boolean> {
-        if (!await RedisClient.exists(key)) {
-            await RedisClient.set(key, JSON.stringify({
+        if (!await redis.exists(key)) {
+            await redis.set(key, JSON.stringify({
                 burstCapacity: burstRateLimiter.maxRequestPerSecond - 1,
                 lastRequestTimeStamp: Date.now()
-            }), burstRateLimiter.burstCapacityExpiryInSeconds);
+            }), 'EX', burstRateLimiter.burstCapacityExpiryInSeconds);
             return true;
         }
 
-        let value = JSON.parse(await RedisClient.get(key) as string);
+        let value = JSON.parse(await redis.get(key) as string);
 
         let currentBurstCapacity: number = new Number(value.burstCapacity) as number;
 
@@ -23,10 +25,10 @@ export class BurstRateLimiterService implements IRateLimiterService {
         const canAcceptRequest = burstRateLimiter.isRequestAvailable(currentBurstCapacity);
 
         if (canAcceptRequest) {
-            await RedisClient.set(key, JSON.stringify({
+            await redis.set(key, JSON.stringify({
                 burstCapacity: currentBurstCapacity - 1,
                 lastRequestTimeStamp: Date.now()
-            }), burstRateLimiter.burstCapacityExpiryInSeconds);
+            }), 'EX', burstRateLimiter.burstCapacityExpiryInSeconds);
         }
 
         return canAcceptRequest;

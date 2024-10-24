@@ -7,7 +7,7 @@ export default class RedisClient {
 
     private constructor() { }
 
-    private static getInstance(): Redis {
+    public static getInstance(): Redis {
         if (!this.instance) {
             this.instance = new Redis({
                 host: process.env.REDIS_HOST || 'localhost',
@@ -19,64 +19,5 @@ export default class RedisClient {
             });
         }
         return this.instance;
-    }
-
-    public static async connect(): Promise<void> {
-        const redis = this.getInstance();
-        await redis.connect();
-    }
-
-    public static async get(key: string): Promise<string | null> {
-        const redis = this.getInstance();
-        return await redis.get(key);
-    }
-
-    public static async keys(pattern: string): Promise<string[]> {
-        const redis = this.getInstance();
-        return await redis.keys(pattern);
-    }
-
-    public static async increment(key: string): Promise<void> {
-        const redis = this.getInstance();
-        await redis.incr(key);
-    }
-
-    public static async incrementBy(key: string, value: number): Promise<void> {
-        const redis = this.getInstance();
-        await redis.incrby(key, value);
-    }
-
-    public static async decrement(key: string): Promise<void> {
-        const redis = this.getInstance();
-        await redis.decr(key);
-    }
-
-    public static async set(key: string, value: number | string, expirationInSeconds?: number): Promise<void> {
-        const redis = this.getInstance();
-        if (expirationInSeconds) {
-            await redis.set(key, value, 'EX', expirationInSeconds);
-        } else {
-            await redis.set(key, value);
-        }
-    }
-
-    public static async delete(key: string): Promise<void> {
-        const redis = this.getInstance();
-        await redis.del(key);
-    }
-
-    public static async exists(key: string): Promise<boolean> {
-        const redis = this.getInstance();
-        const result = await redis.exists(key);
-        return result === 1;
-    }
-
-    public static async disconnect(): Promise<void> {
-        const redis = this.getInstance();
-        if (redis) {
-            await redis.quit();
-            redis.disconnect();
-            this.instance = null;
-        }
     }
 }

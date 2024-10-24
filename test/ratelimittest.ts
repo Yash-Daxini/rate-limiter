@@ -25,24 +25,33 @@ let makeSyncRequest = (endPoint: string) => {
     });
 }
 
-let testLimit = async (endPoint: string) => {
+let testLimit = async (endPoint: string, seconds: number, requestPerSeconds: number) => {
 
     let acceptedRequests = 0;
     let rejectedRequests = 0;
 
     let startTime = Date.now();
+    console.warn("starttime ",startTime);
     let totalCount = 0;
-    while (Date.now() - startTime < 1000) {
-        let x = await makeSyncRequest(endPoint);
-        if (x == 200)
-            acceptedRequests++;
-        else
-            rejectedRequests++
-        totalCount++;
+    for (let i = 1; i <= seconds; i++) {
+        let requestPerSecond = 0;
+        while (Date.now() - startTime < i * 1000)
+            while (Date.now() - startTime < i * 1000 && requestPerSecond < requestPerSeconds) {
+                let x = await makeSyncRequest(endPoint);
+                if (x == 200)
+                    acceptedRequests++;
+                else
+                    rejectedRequests++
+                requestPerSecond++;
+            }
+        totalCount += requestPerSecond;
+        console.warn(`${i} ${totalCount} ${acceptedRequests}`)
     }
 
-    console.warn(`Total Requsts in 1 sec = ${totalCount} Accepted = ${acceptedRequests} Rejected = ${rejectedRequests}`);
+    console.warn((Date.now() - startTime) / 1000)
+
+    console.warn(`Total Requsts in ${seconds} sec = ${totalCount} Accepted = ${acceptedRequests} Rejected = ${rejectedRequests}`);
 }
 
-// testLimit("nonBurst");
-testLimit("burst"); 
+testLimit("nonBurst", 10, 20);
+// testLimit("burst", 10, 20); 
