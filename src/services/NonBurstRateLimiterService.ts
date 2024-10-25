@@ -6,19 +6,21 @@ let redis = RedisClient.getInstance();
 
 export class NonBurstRateLimiterService implements IRateLimiterService {
     async canAcceptRequest(nonBurstRateLimiter: NonBurstRateLimiter, key: string): Promise<boolean> {
-        if (! await redis.exists(key)) {
-            await redis.set(key, 1, 'EX', 1);
-            return true;
-        }
 
-        const acceptedRequestCount = new Number(await redis.get(key));
+        const currentTime = Date.now();
 
-        const canAcceptRequest = nonBurstRateLimiter.isRequestAvailable(acceptedRequestCount as number);
+        const windowStartTime = currentTime - 1000;
 
-        if (canAcceptRequest) {
-            await redis.incr(key);
-        }
+        await redis.zremrangebyscore(key, 0, windowStartTime);
+
+        const requestCount = await redis.zcard(key);
+
+        const canAcceptRequest: boolean = nonBurstRateLimiter.isRequestAvailable(requestCount);
+
+        if (canAcceptRequest)
+            await redis.zadd(key, currentTime, currentTime);
 
         return canAcceptRequest;
+
     }
 }
