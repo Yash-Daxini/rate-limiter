@@ -1,60 +1,49 @@
-import http from 'http';
-
-let makeSyncRequest = (endPoint: string) => {
-    const urlObj = new URL(`http://localhost:3000/${endPoint}`);
-    const options = {
-        hostname: urlObj.hostname,
-        path: urlObj.pathname,
+let makeRequest = async (endPoint: string) => {
+    let res = await fetch(`http://localhost:3000/${endPoint}`, {
         headers: {
-            'Content-Type': 'application/json',
             'x-user-id': 'ddfdd4'
         },
-        port: 3000
-    };
-    return new Promise((resolve, reject) => {
-        const req = http.get(options, (res) => {
-            res.on('data', () => { });
-            res.on('end', () => {
-                resolve(res.statusCode);
-            });
-        });
-
-        req.on('error', (err) => {
-            reject(err);
-        });
     });
+    return res.status;
 }
 
-let testLimit = async (endPoint: string, seconds: number, requestPerSeconds: number) => {
+let testLimit = async (endPoint: string, seconds: number, requestsPerSecond: number) => {
 
     let acceptedRequests = 0;
     let rejectedRequests = 0;
+    let totalCount = 0;
 
     let startTime = Date.now();
-    console.warn("starttime ", startTime);
-    let totalCount = 0;
+
     for (let i = 1; i <= seconds; i++) {
-        let requestPerSecond = 0;
-        while (Date.now() - startTime < i * 999)
-            while (Date.now() - startTime < i * 1000 && requestPerSecond < requestPerSeconds) {
-                let x = await makeSyncRequest(endPoint);
-                if (x == 200)
-                    acceptedRequests++;
-                else
-                    rejectedRequests++
-                requestPerSecond++;
+        const interval = 1000 / requestsPerSecond;
 
-                // console.warn(`Request no = ${requestPerSecond} at ${i} sec with timestamp ${Date.now()}`)
-            }
-        totalCount += requestPerSecond;
-        console.warn(`${i} ${totalCount} ${acceptedRequests}`)
-        // console.warn((Date.now() - startTime) / 1000);
+        const requests: Promise<number>[] = [];
+
+        for (let j = 1; j <= requestsPerSecond; j++) {
+            requests.push(
+                new Promise((resolve) =>
+                    setTimeout(async () => {
+                        const statusCode = await makeRequest(endPoint);
+                        resolve(statusCode);
+                    }, j * interval)
+                )
+            );
+        }
+
+        const results = await Promise.all(requests);
+
+        results.forEach((statusCode) => {
+            if (statusCode === 200) acceptedRequests++;
+            else if (statusCode === 429) rejectedRequests++;
+        });
+
+        totalCount += requestsPerSecond;
+        console.warn(`${i} ${requestsPerSecond} ${acceptedRequests}`);
     }
-
-    // console.warn((Date.now() - startTime) / 1000)
-
-    console.warn(`Total Requsts in ${seconds} sec = ${totalCount} Accepted = ${acceptedRequests} Rejected = ${rejectedRequests}`);
+    let totalTime = (Date.now() - startTime) / 1000;
+    console.warn(`Total Requests Sent: ${totalCount}, Accepted: ${acceptedRequests}, Rejected: ${rejectedRequests} Total Time : ${totalTime}`);
 }
 
-testLimit("nonBurst", 3, 20);
+testLimit("nonBurst", 10, 20);
 // testLimit("burst", 10, 20); 

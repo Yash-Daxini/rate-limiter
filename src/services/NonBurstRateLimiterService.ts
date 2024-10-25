@@ -11,16 +11,23 @@ export class NonBurstRateLimiterService implements IRateLimiterService {
 
         const windowStartTime = currentTime - 1000;
 
-        await redis.zremrangebyscore(key, 0, windowStartTime);
+        const pipeline = redis.pipeline();
 
-        const requestCount = await redis.zcard(key);
+        pipeline.zremrangebyscore(key, "-inf", windowStartTime);
+
+        pipeline.zcard(key);
+
+        const results: Array<[Error | null, number]> = await pipeline.exec() as Array<[Error | null, number]>;
+
+        const requestCount: number = results[1][1];
 
         const canAcceptRequest: boolean = nonBurstRateLimiter.isRequestAvailable(requestCount);
 
-        if (canAcceptRequest)
+        if (canAcceptRequest) {
             await redis.zadd(key, currentTime, currentTime);
+            await redis.expire(key, 1);
+        }
 
         return canAcceptRequest;
-
     }
 }
