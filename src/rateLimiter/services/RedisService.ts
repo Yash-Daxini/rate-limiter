@@ -10,8 +10,8 @@ export default class RedisClient {
     public static getInstance(): Redis {
         if (!this.instance) {
             this.instance = new Redis({
-                host: process.env.REDIS_HOST || 'localhost',
-                port: Number(process.env.REDIS_PORT) || 6379,
+                host: 'redis',
+                port: 6379
             });
 
             this.instance.on("error", (err) => {
