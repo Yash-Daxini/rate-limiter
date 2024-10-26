@@ -6,15 +6,15 @@ import { RateLimitLevel } from './src/enums/RateLimitLevel';
 
 const app: Application = express();
 
-const rateLimiterConfigForNonBurst: RateLimiterConfig = new RateLimiterConfig(20, 0, RateLimitStrategy.NonBurstRateLimiter, RateLimitLevel.IP, 0);
+const rateLimiterConfigForNonBurst: RateLimiterConfig = new RateLimiterConfig(10, 0, RateLimitStrategy.NonBurstRateLimiter, RateLimitLevel.IP, 0);
 
-const rateLimiterConfigForBurst: RateLimiterConfig = new RateLimiterConfig(10, 500, RateLimitStrategy.BurstRateLimiter, RateLimitLevel.IP, 60);
+const rateLimiterConfigForBurst: RateLimiterConfig = new RateLimiterConfig(10, 100, RateLimitStrategy.BurstRateLimiter, RateLimitLevel.IP, 60);
 
 app.get("/burst", rateLimiterMiddleware(rateLimiterConfigForBurst), (req, res) => {
     res.send({ res: "Accepted" });
 })
 
-app.get("/nonBurst", rateLimiterMiddleware(), (req, res) => {
+app.get("/nonBurst", rateLimiterMiddleware(rateLimiterConfigForNonBurst), (req, res) => {
     res.send({ res: "Accepted" });
 })
 
