@@ -1,8 +1,8 @@
 import express, { Application } from 'express';
-import { rateLimiterMiddleware } from './src/middlewares/ratelimiterMiddleware';
-import { RateLimiterConfig } from './src/entity/RatelimiterConfig';
-import { RateLimitStrategy } from './src/enums/RateLimitStrategy';
-import { RateLimitLevel } from './src/enums/RateLimitLevel';
+import { rateLimiterMiddleware } from './src/rateLimiter/middlewares/ratelimiterMiddleware';
+import { RateLimiterConfig } from './src/rateLimiter/entity/RatelimiterConfig';
+import { RateLimitStrategy } from './src/rateLimiter/enums/RateLimitStrategy';
+import { RateLimitLevel } from './src/rateLimiter/enums/RateLimitLevel';
 
 const app: Application = express();
 

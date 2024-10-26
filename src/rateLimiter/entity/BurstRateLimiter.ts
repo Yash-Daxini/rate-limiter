@@ -4,8 +4,8 @@ import { RateLimiter } from "./RateLimiter";
 export class BurstRateLimiter extends RateLimiter {
     burstCapacity: number;
     burstCapacityExpiryInSeconds: number;
-    constructor(maxRequestPerSecond: number, level: RateLimitLevel, burstCapacity: number, burstCapacityExpiryInSeconds: number) {
-        super(maxRequestPerSecond, level);
+    constructor(maxRequestPerSecond: number, rateLimitLevel: RateLimitLevel, burstCapacity: number, burstCapacityExpiryInSeconds: number) {
+        super(maxRequestPerSecond, rateLimitLevel);
         this.burstCapacity = burstCapacity;
         this.burstCapacityExpiryInSeconds = burstCapacityExpiryInSeconds;
     }

@@ -6,6 +6,7 @@ let redis = RedisClient.getInstance();
 
 export class BurstRateLimiterService implements IRateLimiterService {
     async canAcceptRequest(burstRateLimiter: BurstRateLimiter, key: string): Promise<boolean> {
+        
         if (!await redis.exists(key)) {
             await redis.set(key, JSON.stringify({
                 burstCapacity: burstRateLimiter.maxRequestPerSecond - 1,
