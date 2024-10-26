@@ -18,18 +18,18 @@ export const rateLimiterMiddleware = (config?: RateLimiterConfig | null): any =>
         let canAcceptRequest: Boolean = false;
 
         switch (config.rateLimitLevel) {
-            case RateLimitLevel.User:
-                canAcceptRequest = await RateLimiterService(config, req.headers[HEADER_USER_ID]?.toString());
+            case RateLimitLevel.Service:
+                const serviceName = req.headers[HEADER_SERVICE_NAME];
+                canAcceptRequest = await RateLimiterService(config, serviceName?.toLocaleString());
                 break;
             case RateLimitLevel.IP:
                 const ip = req.headers[HEADER_IP_ADDRESS] || req.socket.remoteAddress;
                 canAcceptRequest = await RateLimiterService(config, ip?.toLocaleString());
                 break;
-
-            case RateLimitLevel.Service:
-                const serviceName = req.headers[HEADER_SERVICE_NAME];
-                canAcceptRequest = await RateLimiterService(config, serviceName?.toLocaleString());
+            case RateLimitLevel.User:
+                canAcceptRequest = await RateLimiterService(config, req.headers[HEADER_USER_ID]?.toString());
                 break;
+
         }
         if (!canAcceptRequest)
             return res.status(429).json({ message: 'Too many requests. Please try again later.' });
