@@ -3,11 +3,11 @@ import { RateLimitStrategy } from "../enums/RateLimitStrategy";
 
 export class RateLimiterConfig {
     maxRequest: number;
-    burstCapacity: number | null;
     rateLimitStrategy: RateLimitStrategy
     rateLimitLevel: RateLimitLevel;
-    burstCapacityExpiryInSeconds: number | null;
-    constructor(maxRequest: number, burstCapacity: number, rateLimitStrategy: RateLimitStrategy, rateLimiterLevel: RateLimitLevel, burstCapacityExpiryInSeconds: number) {
+    burstCapacity?: number | null;
+    burstCapacityExpiryInSeconds?: number | null;
+    constructor(maxRequest: number, rateLimitStrategy: RateLimitStrategy, rateLimiterLevel: RateLimitLevel, burstCapacity?: number, burstCapacityExpiryInSeconds?: number) {
         this.maxRequest = maxRequest;
         this.burstCapacity = burstCapacity;
         this.rateLimitStrategy = rateLimitStrategy

@@ -13,7 +13,7 @@ export const rateLimiterMiddleware = (config?: RateLimiterConfig | null): any =>
         }
 
         if (config === null)
-            return false;
+            return res.status(422).json({ message: 'Plese provide valid configuration! ' });
 
         let canAcceptRequest: Boolean = false;
 
