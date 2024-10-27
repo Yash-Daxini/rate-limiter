@@ -1,11 +1,14 @@
-import express, { Application } from 'express';
+import express, { Application, Request } from 'express';
 import { RateLimiterConfig } from '../../rateLimiter/entity/RatelimiterConfig';
 import { RateLimitLevel } from '../../rateLimiter/enums/RateLimitLevel';
 import { rateLimiterMiddleware } from '../../rateLimiter/middlewares/ratelimiterMiddleware';
 import { RateLimitStrategy } from '../../rateLimiter/enums/RateLimitStrategy';
+import cors from 'cors';
 
 const app: Application = express();
 const port: Number = 3002;
+
+app.use(cors<Request>());
 
 const rateLimiterConfigForNonBurst: RateLimiterConfig = new RateLimiterConfig(10, RateLimitStrategy.NonBurstRateLimiter, RateLimitLevel.Service); //config
 
