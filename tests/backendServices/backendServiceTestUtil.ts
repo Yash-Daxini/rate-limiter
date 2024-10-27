@@ -19,13 +19,16 @@ export let testRequestRateLimit = async (apiUrl: string, headers: any) => {
         totalRequests++;
     }
     let totalTime = (Date.now() - startTime) / 1000;
-    return {totalRequests,acceptedRequests,rejectedRequests};
+    return acceptedRequests;
 }
 
-export let testRequestBurst = async (endPoint: string, requestIntervalInSeconds: number) => {
-    await testRequestRateLimit(endPoint, 1);
+export let testRequestBurst = async (endPoint: string, requestIntervalInSeconds: number, headers: any) => {
+    let acceptedRequests = await makeRequest(endPoint, headers);
     console.warn(`Burst come after ${requestIntervalInSeconds} seconds ...`)
-    setTimeout(() => {
-        testRequestRateLimit(endPoint, 1);
+    setTimeout(async () => {
+        acceptedRequests += await testRequestRateLimit(endPoint, headers);
+        return acceptedRequests;
     }, requestIntervalInSeconds * 1000);
+    console.warn(acceptedRequests);
+    return acceptedRequests;
 }

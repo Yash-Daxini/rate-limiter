@@ -19,6 +19,28 @@ app.get("/api/service1/burst", rateLimiterMiddleware(rateLimiterConfigForBurst),
     res.send({ message: "Accepted" });
 })
 
+app.get("/api/service1/nonBurst/callservice3", async (req, res) => {
+    let response = await fetch("http://localhost:3002/api/service3/nonBurst", {
+        headers: {
+            'x-service-name': 'service1'
+        }
+    });
+    let responseMessage = await response.json();
+    res.status(response.status);
+    res.send(responseMessage);
+})
+
+app.get("/api/service1/burst/callservice3", async (req, res) => {
+    let response = await fetch("http://localhost:3002/api/service3/burst", {
+        headers: {
+            'x-service-name': 'service1'
+        }
+    });
+    let responseMessage = await response.json();
+    res.status(response.status);
+    res.send(responseMessage);
+})
+
 app.listen(port, () => {
     console.warn(`Server is running on port ${port}`)
 })  

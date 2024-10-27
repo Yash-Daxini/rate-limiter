@@ -22,21 +22,21 @@ appWithCustomConfig.get("/", (req, res) => {
     res.send({ message: "Accepted" });
 });
 
-describe('rateLimiterMiddleware with default config', () => {
+describe('Middleware test rateLimiterMiddleware with default config', () => {
     test('reqeust should accepted', async () => {
         const response = await request(appWithDefaultConfig).get('/').set('x-user-id', 'fdsfasd');
         expect(response.status).toBe(200);
     })
 })
 
-describe('rateLimiterMiddleware with default config', () => {
+describe('Middleware test rateLimiterMiddleware with default config', () => {
     test('reqeust should rejected', async () => {
         const response = await request(appWithDefaultConfig).get('/');
         expect(response.status).toBe(429);
     })
 })
 
-describe('rateLimiterMiddleware with custom config', () => {
+describe('Middleware test rateLimiterMiddleware with custom config', () => {
     test('reqeust should rejected', async () => {
         const response = await request(appWithCustomConfig).get('/');
         expect(response.status).toBe(429);
