@@ -4,19 +4,15 @@ services:
     image: redis:latest
     ports: [ "6379:6379" ]
 
-  ratelimiter:
-    build:
-      context: .
-      dockerfile: Dockerfile
-    container_name: ratelimiter
-    depends_on: [ redis ]
-
   service1:
     build:
       context: .
       dockerfile: Dockerfile
     command: [ "yarn", "start-service1" ]
     depends_on: [ redis ]
+    environment:
+      - REDIS_URL=redis
+      - REDIS_PORT=6379
     ports: [ "3000:3000" ]
 
   service2:
@@ -25,6 +21,9 @@ services:
       dockerfile: Dockerfile
     command: [ "yarn", "start-service2" ]
     depends_on: [ redis ]
+    environment:
+      - REDIS_URL=redis
+      - REDIS_PORT=6379
     ports: [ "3001:3001" ]
 
   service3:
@@ -33,4 +32,7 @@ services:
       dockerfile: Dockerfile
     command: [ "yarn", "start-service3" ]
     depends_on: [ redis ]
+    environment:
+      - REDIS_URL=redis
+      - REDIS_PORT=6379
     ports: [ "3002:3002" ]

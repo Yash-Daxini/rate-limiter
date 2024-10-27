@@ -7,4 +7,4 @@ RUN yarn install
 
 RUN yarn add typescript
 COPY . .
-RUN yarn tsc
+RUN yarn tsc    

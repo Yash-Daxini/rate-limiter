@@ -9,7 +9,7 @@ export class BurstRateLimiterService implements IRateLimiterService {
         
         if (!await redis.exists(key)) {
             await redis.set(key, JSON.stringify({
-                burstCapacity: burstRateLimiter.maxRequestPerSecond - 1,
+                burstCapacity: burstRateLimiter.maxRequestsPerSecond - 1,
                 lastRequestTimeStamp: Date.now()
             }), 'EX', burstRateLimiter.burstCapacityExpiryInSeconds);
             return true;
@@ -19,7 +19,7 @@ export class BurstRateLimiterService implements IRateLimiterService {
 
         let currentBurstCapacity: number = new Number(value.burstCapacity) as number;
 
-        currentBurstCapacity += Math.floor((Date.now() - value.lastRequestTimeStamp) / 1000) * burstRateLimiter.maxRequestPerSecond;
+        currentBurstCapacity += Math.floor((Date.now() - value.lastRequestTimeStamp) / 1000) * burstRateLimiter.maxRequestsPerSecond;
 
         currentBurstCapacity = Math.min(currentBurstCapacity, burstRateLimiter.burstCapacity);
 

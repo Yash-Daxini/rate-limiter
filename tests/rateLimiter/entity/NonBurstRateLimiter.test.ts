@@ -5,7 +5,7 @@ const nonBurstRateLimiter: NonBurstRateLimiter = new NonBurstRateLimiter(10, Rat
 
 describe('Entity test isRequestAvailable function', () => {
     test('Should return false when already achived max requests per second', () => {
-        expect(nonBurstRateLimiter.isRequestAvailable(nonBurstRateLimiter.maxRequestPerSecond)).toBeFalsy();
+        expect(nonBurstRateLimiter.isRequestAvailable(nonBurstRateLimiter.maxRequestsPerSecond)).toBeFalsy();
     })
 })
 

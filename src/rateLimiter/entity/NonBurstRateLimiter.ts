@@ -6,6 +6,6 @@ export class NonBurstRateLimiter extends RateLimiter {
         super(maxRequestPerSecond, rateLimitLevel);
     }
     public isRequestAvailable = (acceptedRequestCount: number): boolean => {
-        return acceptedRequestCount < this.maxRequestPerSecond;
+        return acceptedRequestCount < this.maxRequestsPerSecond;
     }
 }
