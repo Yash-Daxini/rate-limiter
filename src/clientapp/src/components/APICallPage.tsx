@@ -64,10 +64,15 @@ const APICallPage: React.FC<APICallPageProps> = ({ service, url1, url2, headers 
                     }} />
                 </div>
 
-
-                <button type="button" onClick={async () => {
-                    await testRateLimit()
-                }} className="btn btn-success">Send Requests</button>
+                <div>
+                    <button type="button" onClick={async () => {
+                        await testRateLimit()
+                    }} className="btn btn-success" disabled={isResponsePending}>Send Requests</button>
+                    <button className="btn border-0">
+                        {isResponsePending ? 
+                        "Process is running, please wait ...":""}
+                    </button>
+                </div>
             </div>
             <div>
                 <table className="table">
