@@ -13,6 +13,7 @@ services:
     environment:
       - REDIS_URL=redis
       - REDIS_PORT=6379
+      - Service3_Domain=service3
     ports: [ "3000:3000" ]
 
   service2:

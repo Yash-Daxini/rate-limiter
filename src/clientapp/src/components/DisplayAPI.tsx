@@ -18,8 +18,8 @@ const DisplayAPI = () => {
                 headers={{
                     "x-forwarded-for": "193.168.1.1"
                 }} />
-            <Accordion key={3} title='Service Level Rate Limiter (Service 3)' url1='http://localhost:3002/api/service3/nonBurst'
-                url2='http://localhost:3002/api/service3/burst'
+            <Accordion key={3} title='Service Level Rate Limiter (Service 3)' url1='http://localhost:3000/api/service1/nonBurst/callservice3'
+                url2='http://localhost:3000/api/service1/burst/callservice3'
                 service='service'
                 headers={{
                     "x-service-name": "service1"

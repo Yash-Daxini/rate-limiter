@@ -4,6 +4,8 @@ import { RateLimitStrategy } from '../../rateLimiter/enums/RateLimitStrategy';
 import { RateLimitLevel } from '../../rateLimiter/enums/RateLimitLevel';
 import { rateLimiterMiddleware } from '../../rateLimiter/middlewares/ratelimiterMiddleware';
 import cors from "cors";
+import * as dotenv from "dotenv";
+dotenv.config();
 
 const app: Application = express();
 const port: Number = 3000;
@@ -23,7 +25,8 @@ app.get("/api/service1/burst", rateLimiterMiddleware(rateLimiterConfigForBurst),
 })
 
 app.get("/api/service1/nonBurst/callservice3", async (req, res) => {
-    let response = await fetch("http://localhost:3002/api/service3/nonBurst", {
+    let service3_domain = process.env.Service3_Domain || "localhost";
+    let response = await fetch(`http://${service3_domain}:3002/api/service3/nonBurst`, {
         headers: {
             'x-service-name': 'service1'
         }
@@ -34,7 +37,8 @@ app.get("/api/service1/nonBurst/callservice3", async (req, res) => {
 })
 
 app.get("/api/service1/burst/callservice3", async (req, res) => {
-    let response = await fetch("http://localhost:3002/api/service3/burst", {
+    let service3_domain = process.env.Service3_Domain || "localhost";
+    let response = await fetch(`http://${service3_domain}:3002/api/service3/burst`, {
         headers: {
             'x-service-name': 'service1'
         }
