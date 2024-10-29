@@ -8,18 +8,26 @@ interface APICallPageProps {
     headers: any
 }
 
+interface RateLimitTestingResponse {
+    second: number,
+    totalRequestsPerSecond: number,
+    acceptedRequests: number,
+    rejectedRequests: number
+}
+
 const APICallPage: React.FC<APICallPageProps> = ({ service, url1, url2, headers }: APICallPageProps) => {
 
     const [url, setUrl] = useState<string>(url1);
-    const [responseList, setResponseList] = useState<{ totalTime: number, totalRequests: number, acceptedRequests: number, rejectedRequests: number }[]>([]);
+    const [responseList, setResponseList] = useState<RateLimitTestingResponse[]>([]);
     const [requestSeconds, setRequestSeconds] = useState<number>(1);
     const [isResponsePending, setIsResponsePending] = useState(false);
+    const [totalTimeToProcessRequestTest, setTotalTimeToProcessRequestTest] = useState<number>(0);
 
     let responseTableColumns = responseList.map((response) => {
         return (
             <tr>
-                <td scope="row">{response.totalTime}</td>
-                <td>{response.totalRequests}</td>
+                <td scope="row">{response.second}</td>
+                <td>{response.totalRequestsPerSecond}</td>
                 <td>{response.acceptedRequests}</td>
                 <td>{response.rejectedRequests}</td>
             </tr>
@@ -28,9 +36,10 @@ const APICallPage: React.FC<APICallPageProps> = ({ service, url1, url2, headers 
 
     let testRateLimit = async () => {
         setIsResponsePending(true);
-        let response: { totalTime: number, totalRequests: number, acceptedRequests: number, rejectedRequests: number } = await testRequestRateLimit(url, headers, requestSeconds);
+        let response: { totalTime: number, responses: RateLimitTestingResponse[] } = await testRequestRateLimit(url, headers, requestSeconds);
         setIsResponsePending(false);
-        setResponseList([...responseList, response]);
+        setTotalTimeToProcessRequestTest(response.totalTime);
+        setResponseList(response.responses);
     }
 
 
@@ -69,8 +78,8 @@ const APICallPage: React.FC<APICallPageProps> = ({ service, url1, url2, headers 
                         await testRateLimit()
                     }} className="btn btn-success" disabled={isResponsePending}>Send Requests</button>
                     <button className="btn border-0">
-                        {isResponsePending ? 
-                        "Process is running, please wait ...":""}
+                        {isResponsePending ?
+                            "Process is running, please wait ..." : totalTimeToProcessRequestTest === 0 ? "" : `Time taken to complete process ${totalTimeToProcessRequestTest}`}
                     </button>
                 </div>
             </div>
@@ -78,7 +87,7 @@ const APICallPage: React.FC<APICallPageProps> = ({ service, url1, url2, headers 
                 <table className="table">
                     <thead>
                         <tr>
-                            <th scope="col">Total Time</th>
+                            <th scope="col">Second</th>
                             <th scope="col">Total Request Sent</th>
                             <th scope="col">Accepted Requests</th>
                             <th scope="col">Rejected Requests</th>
