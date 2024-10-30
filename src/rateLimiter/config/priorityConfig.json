@@ -1,0 +1,23 @@
+{
+    "User": [
+        {
+            "user": "abc",
+            "maxRequestsPerSecond": 20,
+            "burstCapacity": 200
+        }
+    ],
+    "IP": [
+        {
+            "ip": "192.168.1.1",
+            "maxRequestsPerSecond": 20,
+            "burstCapacity": 200
+        }
+    ],
+    "service": [
+        {
+            "service": "service1",
+            "maxRequestsPerSecond": 20,
+            "burstCapacity": 200
+        }
+    ]
+}
