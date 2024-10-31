@@ -13,7 +13,7 @@
             "burstCapacity": 200
         }
     ],
-    "service": [
+    "Service": [
         {
             "service": "service1",
             "maxRequestsPerSecond": 20,
