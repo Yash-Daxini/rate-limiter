@@ -98,7 +98,7 @@ const APICallPage: React.FC<APICallPageProps> = ({ level: level, url1, url2 }: A
                 </div>
                 <div>
                     <label htmlFor="customRange3" className="form-label">Till how many seconds you want to make requests ? <br /> <strong>{requestSeconds} seconds</strong> </label>
-                    <input type="range" value={requestSeconds} className="form-range" min="1" max="60" step="1" id="customRange3" onChange={(e) => {
+                    <input type="range" value={requestSeconds} className="form-range" min="1" max="120" step="1" id="customRange3" onChange={(e) => {
                         setRequestSeconds(+e.target.value);
                     }} />
                 </div>
