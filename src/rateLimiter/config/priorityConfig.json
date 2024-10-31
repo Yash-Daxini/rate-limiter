@@ -15,7 +15,7 @@
     ],
     "Service": [
         {
-            "service": "service1",
+            "service": "service2",
             "maxRequestsPerSecond": 20,
             "burstCapacity": 200
         }

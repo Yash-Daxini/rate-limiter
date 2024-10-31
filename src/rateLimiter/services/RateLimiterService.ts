@@ -11,7 +11,7 @@ export const RateLimiterService = async (config: RateLimiterConfig, key: string 
     if (!key)
         return false;
 
-    setPriorityConfig(config, key);
+    config = setPriorityConfig(config, key);
 
     if (config.rateLimitStrategy === RateLimitStrategy.BurstRateLimiter)
         return await handleBurstRateLimiter(config, key);
@@ -42,8 +42,7 @@ const setPriorityConfig = (config: RateLimiterConfig, key: string): RateLimiterC
     let specificPriorityConfig = getPriorityConfig(config, key);
 
     if (specificPriorityConfig) {
-        config.maxRequestsPerSecond = specificPriorityConfig.maxRequestsPerSecond;
-        config.burstCapacity = specificPriorityConfig.burstCapacity;
+        return new RateLimiterConfig(specificPriorityConfig.maxRequestsPerSecond, config.rateLimitStrategy, config.rateLimitLevel, specificPriorityConfig.burstCapacity, config.burstCapacityExpiryInSeconds as number);
     }
 
     return config;

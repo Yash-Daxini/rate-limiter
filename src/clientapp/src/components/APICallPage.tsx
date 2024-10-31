@@ -1,11 +1,11 @@
 import { useState } from "react";
 import { testRequestRateLimit } from "../utils/ratelimittest";
+import { IpHeader, IpPriorityHeader, ServiceHeader, ServicePriorityHeader, UserHeader, UserPriorityHeader } from "../constants/HeaderConstants";
 
 interface APICallPageProps {
-    service: string,
+    level: string,
     url1: string,
-    url2: string,
-    headers: any
+    url2: string
 }
 
 interface RateLimitTestingResponse {
@@ -15,13 +15,14 @@ interface RateLimitTestingResponse {
     rejectedRequests: number
 }
 
-const APICallPage: React.FC<APICallPageProps> = ({ service, url1, url2, headers }: APICallPageProps) => {
+const APICallPage: React.FC<APICallPageProps> = ({ level: level, url1, url2 }: APICallPageProps) => {
 
     const [url, setUrl] = useState<string>(url1);
     const [responseList, setResponseList] = useState<RateLimitTestingResponse[]>([]);
     const [requestSeconds, setRequestSeconds] = useState<number>(1);
     const [isResponsePending, setIsResponsePending] = useState(false);
     const [totalTimeToProcessRequestTest, setTotalTimeToProcessRequestTest] = useState<number>(0);
+    const [isPriority, setIsPriority] = useState<boolean>(false);
 
     let responseTableColumns = responseList.map((response) => {
         return (
@@ -36,33 +37,62 @@ const APICallPage: React.FC<APICallPageProps> = ({ service, url1, url2, headers 
 
     let testRateLimit = async () => {
         setIsResponsePending(true);
-        let response: { totalTime: number, responses: RateLimitTestingResponse[] } = await testRequestRateLimit(url, headers, requestSeconds);
+        let response: { totalTime: number, responses: RateLimitTestingResponse[] } = await testRequestRateLimit(url, getHeader(), requestSeconds);
         setIsResponsePending(false);
         setTotalTimeToProcessRequestTest(response.totalTime);
         setResponseList(response.responses);
     }
 
+    const getHeader = (): any => {
+        if (isPriority) return getPriorityHeader();
+        if (level === 'user')
+            return UserHeader;
+        else if (level === 'ip')
+            return IpHeader;
+        else if (level === 'service')
+            return ServiceHeader;
+    }
+
+    const getPriorityHeader = () => {
+        if (level === 'user')
+            return UserPriorityHeader;
+        else if (level === 'ip')
+            return IpPriorityHeader;
+        else if (level === 'service')
+            return ServicePriorityHeader;
+    }
 
     return (
         <div>
             <div>
                 <div className="d-flex justify-content-center gap-5">
                     <div className="form-check my-3">
-                        <input className="form-check-input border-dark" type="radio" name={`flexRadioDefault${service}`} id="flexRadioDefault1" checked={url === url1} onChange={(e) => {
+                        <input className="form-check-input border-dark" type="radio" name={`flexRadioDefault${level}`} id={`flexRadioDefault${level}1`} checked={url === url1} onChange={(e) => {
                             if (e.target.checked)
                                 setUrl(url1);
                         }} />
-                        <label className="form-check-label" htmlFor="flexRadioDefault1">
+                        <label className="form-check-label" htmlFor={`flexRadioDefault${level}1`}>
                             Non burst strategy
                         </label>
                     </div>
                     <div className="form-check my-3">
-                        <input className="form-check-input border-dark" type="radio" name={`flexRadioDefault${service}`} id="flexRadioDefault2" checked={url === url2} onChange={(e) => {
+                        <input className="form-check-input border-dark" type="radio" name={`flexRadioDefault${level}`} id={`flexRadioDefault${level}2`} checked={url === url2} onChange={(e) => {
                             if (e.target.checked)
                                 setUrl(url2);
                         }} />
-                        <label className="form-check-label" htmlFor="flexRadioDefault2">
+                        <label className="form-check-label" htmlFor={`flexRadioDefault${level}2`}>
                             Burst Strategy
+                        </label>
+                    </div>
+                    <div className="form-check my-3">
+                        <input className="form-check-input border-dark" type="checkbox" onChange={(e) => {
+                            if (e.target.checked)
+                                setIsPriority(true);
+                            else
+                                setIsPriority(false);
+                        }} />
+                        <label className="form-check-label" htmlFor="flexRadioDefault1">
+                            Want to do requests with priority ?
                         </label>
                     </div>
                 </div>
