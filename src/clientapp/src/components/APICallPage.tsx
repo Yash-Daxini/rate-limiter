@@ -34,7 +34,6 @@ const APICallPage: React.FC<APICallPageProps> = ({ level: level, url1, url2 }: A
             </tr>
         )
     })
-
     let testRateLimit = async () => {
         setIsResponsePending(true);
         let response: { totalTime: number, responses: RateLimitTestingResponse[] } = await testRequestRateLimit(url, getHeader(), requestSeconds);
@@ -109,7 +108,7 @@ const APICallPage: React.FC<APICallPageProps> = ({ level: level, url1, url2 }: A
                     }} className="btn btn-success" disabled={isResponsePending}>Send Requests</button>
                     <button className="btn border-0">
                         {isResponsePending ?
-                            "Process is running, please wait ..." : totalTimeToProcessRequestTest === 0 ? "" : `Time taken to complete process ${totalTimeToProcessRequestTest}`}
+                            "Process is running, please wait ..." : totalTimeToProcessRequestTest === 0 ? "" : `Time taken to complete process ${totalTimeToProcessRequestTest}, Total accepted  :- ${responseList.reduce((accumulator, currentValue) => accumulator + currentValue.acceptedRequests, 0)}`}
                     </button>
                 </div>
             </div>
