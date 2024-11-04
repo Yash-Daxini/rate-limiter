@@ -1,8 +1,17 @@
+import axios from "axios";
+
 let makeRequest = async (apiUrl: string, headers: any) => {
-    let res = await fetch(apiUrl, {
-        headers: headers
-    });
-    return res.status;
+    let res;
+    try {
+        const instance = axios.create({
+            headers: headers
+        });
+        res = await instance.get(apiUrl);
+        return res.status;
+    }
+    catch {
+        return res?.status;
+    }
 }
 
 export let testRequestRateLimit = async (apiUrl: string, headers: any, seconds: number) => {
@@ -15,7 +24,7 @@ export let testRequestRateLimit = async (apiUrl: string, headers: any, seconds: 
         let rejectedRequests = 0;
         let totalRequestsPerSecond = 0;
         let startTimeForCurrentSecond = Date.now();
-        while (Date.now() - startTime <= i * 1000) {
+        while (Date.now() - startTime < i * 1000) {
             let statusCode = await makeRequest(apiUrl, headers);
             // if (Date.now() - startTime >= i * 1000) break;
             if (statusCode === 200) acceptedRequests++;
