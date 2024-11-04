@@ -24,9 +24,10 @@ const APICallPage: React.FC<APICallPageProps> = ({ level: level, url1, url2 }: A
     const [totalTimeToProcessRequestTest, setTotalTimeToProcessRequestTest] = useState<number>(0);
     const [isPriority, setIsPriority] = useState<boolean>(false);
 
-    let responseTableColumns = responseList.map((response) => {
+    let responseTableColumns = responseList.map((response,index) => {
         return (
             <tr>
+                <td>{index+1}</td>
                 <td scope="row">{response.second}</td>
                 <td>{response.totalRequestsPerSecond}</td>
                 <td>{response.acceptedRequests}</td>
@@ -36,6 +37,8 @@ const APICallPage: React.FC<APICallPageProps> = ({ level: level, url1, url2 }: A
     })
     let testRateLimit = async () => {
         setIsResponsePending(true);
+        setResponseList([]);
+        setTotalTimeToProcessRequestTest(0);
         let response: { totalTime: number, responses: RateLimitTestingResponse[] } = await testRequestRateLimit(url, getHeader(), requestSeconds);
         setIsResponsePending(false);
         setTotalTimeToProcessRequestTest(response.totalTime);
@@ -59,6 +62,18 @@ const APICallPage: React.FC<APICallPageProps> = ({ level: level, url1, url2 }: A
             return IpPriorityHeader;
         else if (level === 'service')
             return ServicePriorityHeader;
+    }
+
+    const getTotalRequestsSent = (): number => {
+        return responseList.reduce((accumulator, currentValue) => accumulator + currentValue.totalRequestsPerSecond, 0);
+    }
+
+    const getTotalAcceptedRequests = (): number => {
+        return responseList.reduce((accumulator, currentValue) => accumulator + currentValue.acceptedRequests, 0);
+    }
+
+    const getTotalRejectedRequest = (): number => {
+        return responseList.reduce((accumulator, currentValue) => accumulator + currentValue.rejectedRequests, 0);
     }
 
     return (
@@ -108,26 +123,37 @@ const APICallPage: React.FC<APICallPageProps> = ({ level: level, url1, url2 }: A
                     }} className="btn btn-success" disabled={isResponsePending}>Send Requests</button>
                     <button className="btn border-0">
                         {isResponsePending ?
-                            "Process is running, please wait ..." : totalTimeToProcessRequestTest === 0 ? "" : `Time taken to complete process ${totalTimeToProcessRequestTest}, Total accepted  :- ${responseList.reduce((accumulator, currentValue) => accumulator + currentValue.acceptedRequests, 0)}`}
+                            <b>Process is running, please wait ...</b> : totalTimeToProcessRequestTest === 0 ? "" : <></>}
                     </button>
                 </div>
             </div>
             <div>
-                <table className="table">
-                    <thead>
-                        <tr>
-                            <th scope="col">Second</th>
-                            <th scope="col">Total Request Sent</th>
-                            <th scope="col">Accepted Requests</th>
-                            <th scope="col">Rejected Requests</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {isResponsePending ?
-                            <>
-                            </> : responseTableColumns}
-                    </tbody>
-                </table>
+                {totalTimeToProcessRequestTest === 0 ? <></> :
+                    <table className="table">
+                        <thead>
+                            <tr>
+                            <th scope="col">Sr No.</th>
+                                <th scope="col">Second
+                                    <strong> ({totalTimeToProcessRequestTest})</strong>
+                                </th>
+                                <th scope="col">Total Request Sent
+                                    <strong> ({getTotalRequestsSent()})</strong>
+                                </th>
+                                <th scope="col">Accepted Requests
+                                    <strong> ({getTotalAcceptedRequests()})</strong>
+                                </th>
+                                <th scope="col">Rejected Requests
+                                    <strong> ({getTotalRejectedRequest()})</strong>
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {isResponsePending ?
+                                <>
+                                </> : responseTableColumns}
+                        </tbody>
+                    </table>
+                }
             </div>
         </div>
     )

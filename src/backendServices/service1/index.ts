@@ -12,9 +12,9 @@ const port: Number = 3000;
 
 app.use(cors<Request>());
 
-const rateLimiterConfigForNonBurst: RateLimiterConfig = new RateLimiterConfig(1, RateLimitStrategy.NonBurstRateLimiter, RateLimitLevel.User); //config
+const rateLimiterConfigForNonBurst: RateLimiterConfig = new RateLimiterConfig(10, RateLimitStrategy.NonBurstRateLimiter, RateLimitLevel.User); //config
 
-const rateLimiterConfigForBurst: RateLimiterConfig = new RateLimiterConfig(1, RateLimitStrategy.BurstRateLimiter, RateLimitLevel.User, 100, 60); //config
+const rateLimiterConfigForBurst: RateLimiterConfig = new RateLimiterConfig(10, RateLimitStrategy.BurstRateLimiter, RateLimitLevel.User, 100, 60); //config
 
 app.get("/api/service1/nonBurst", rateLimiterMiddleware(rateLimiterConfigForNonBurst), (req, res) => {
     res.send({ message: "Accepted" });
