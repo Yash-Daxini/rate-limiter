@@ -1,17 +1,11 @@
 import axios from "axios";
 
 let makeRequest = async (apiUrl: string, headers: any) => {
-    let res;
-    try {
-        const instance = axios.create({
-            headers: headers
-        });
-        res = await instance.get(apiUrl);
-        return res.status;
-    }
-    catch {
-        return res?.status;
-    }
+    const instance = axios.create({
+        headers: headers
+    });
+    let res = await instance.get(apiUrl, { validateStatus: () => true });
+    return res.status;
 }
 
 export let testRequestRateLimit = async (apiUrl: string, headers: any, seconds: number) => {
