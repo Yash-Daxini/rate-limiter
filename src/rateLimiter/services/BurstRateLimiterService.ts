@@ -6,31 +6,46 @@ let redis = RedisClient.getInstance();
 
 export class BurstRateLimiterService implements IRateLimiterService {
     async canAcceptRequest(burstRateLimiter: BurstRateLimiter, key: string): Promise<boolean> {
-        
-        if (!await redis.exists(key)) {
-            await redis.set(key, JSON.stringify({
-                burstCapacity: burstRateLimiter.maxRequestsPerSecond - 1,
-                lastRequestTimeStamp: Date.now()
-            }), 'EX', burstRateLimiter.burstCapacityExpiryInSeconds);
-            return true;
-        }
 
-        let value = JSON.parse(await redis.get(key) as string);
+        const luaScript = `
+                            local key = KEYS[1]
+                            local maxRequestsPerSecond = tonumber(ARGV[1])
+                            local burstCapacity = tonumber(ARGV[2])
+                            local burstCapacityExpiryInSeconds = tonumber(ARGV[3])
+                            local currentTimeStamp = tonumber(ARGV[4])
 
-        let currentBurstCapacity: number = new Number(value.burstCapacity) as number;
+                            if(redis.call("EXISTS",key) == 0)
+                            then
+                                redis.call("SET",key,cjson.encode({
+                                    burstCapacity = maxRequestsPerSecond - 1,
+                                    lastRequestTimeStamp = currentTimeStamp
+                                }),"EX",burstCapacityExpiryInSeconds)
+                                return true
+                            end
 
-        currentBurstCapacity += Math.floor((Date.now() - value.lastRequestTimeStamp) / 1000) * burstRateLimiter.maxRequestsPerSecond;
+                            local response = cjson.decode(redis.call("GET", key)) 
 
-        currentBurstCapacity = Math.min(currentBurstCapacity, burstRateLimiter.burstCapacity);
+                            local currentBurstCapacity = tonumber(response.burstCapacity)
 
-        const canAcceptRequest = burstRateLimiter.isRequestAvailable(currentBurstCapacity);
+                            local lastRequestTimeStamp = tonumber(response.lastRequestTimeStamp)
 
-        if (canAcceptRequest) {
-            await redis.set(key, JSON.stringify({
-                burstCapacity: currentBurstCapacity - 1,
-                lastRequestTimeStamp: Date.now()
-            }), 'EX', burstRateLimiter.burstCapacityExpiryInSeconds);
-        }
+                            local elapsedTimeInSeconds = math.floor((currentTimeStamp - lastRequestTimeStamp)/1000)
+
+                            currentBurstCapacity = math.min(currentBurstCapacity + (elapsedTimeInSeconds * maxRequestsPerSecond),burstCapacity)
+
+                            if(currentBurstCapacity > 1)
+                            then
+                                redis.call("SET",key,cjson.encode({
+                                    burstCapacity = currentBurstCapacity - 1,
+                                    lastRequestTimeStamp = currentTimeStamp
+                                }),"EX",burstCapacityExpiryInSeconds)
+                                return true
+                            end
+
+                            return false
+        `;
+
+        let canAcceptRequest: boolean = await redis.eval(luaScript, 1, key, burstRateLimiter.maxRequestsPerSecond, burstRateLimiter.burstCapacity, burstRateLimiter.burstCapacityExpiryInSeconds, Date.now()) as boolean;
 
         return canAcceptRequest;
     }

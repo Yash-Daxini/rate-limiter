@@ -7,26 +7,35 @@ let redis = RedisClient.getInstance();
 export class NonBurstRateLimiterService implements IRateLimiterService {
     async canAcceptRequest(nonBurstRateLimiter: NonBurstRateLimiter, key: string): Promise<boolean> {
 
-        const currentTime = Date.now();
+        const luaScript = `
+                            local currentTime = tonumber(ARGV[1])
+                            local windowStartTime = currentTime - 1000
+                            local key = KEYS[1]
+                            local maxRequestsPerSecond = tonumber(ARGV[2])
+                            local lockKey = "lock_" .. key
 
-        const windowStartTime = currentTime - 1000;
+                            if(redis.call("EXISTS",lockKey) == 1)
+                            then
+                                return false;
+                            end
 
-        const pipeline = redis.pipeline();
+                            redis.call("SET",lockKey,'true','EX',1);
 
-        pipeline.zremrangebyscore(key, "-inf", windowStartTime);
+                            redis.call("ZREMRANGEBYSCORE",key,"-inf",windowStartTime)
+                            local requestCount = redis.call("ZCARD",key)
 
-        pipeline.zcard(key);
+                            if requestCount < maxRequestsPerSecond
+                            then    
+                                redis.call("ZADD",key,currentTime,currentTime)
+                                redis.call("EXPIRE",key,1)
+                                redis.call("DEL",lockKey)
+                                return true;
+                            end
+                            redis.call("DEL",lockKey)
+                            return false;
+        `;
 
-        const results: Array<[Error | null, number]> = await pipeline.exec() as Array<[Error | null, number]>;
-
-        const requestCount: number = results[1][1];
-
-        const canAcceptRequest: boolean = nonBurstRateLimiter.isRequestAvailable(requestCount);
-
-        if (canAcceptRequest) {
-            await redis.zadd(key, currentTime, currentTime);
-            await redis.expire(key, 1);
-        }
+        const canAcceptRequest: boolean = await redis.eval(luaScript, 1, key, Date.now(), nonBurstRateLimiter.maxRequestsPerSecond) as boolean;
 
         return canAcceptRequest;
     }

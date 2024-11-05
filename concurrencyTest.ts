@@ -11,7 +11,6 @@ const luascript = `
 
 setTimeout(async () => {
     // operationWithoutLua(1);
-    // operationWithLua(1);
     let res = await fetch("http://localhost:3000/api/service1/nonBurst", {
         headers: {
             "x-user-id": "dd"
@@ -28,7 +27,7 @@ setTimeout(async () => {
             "x-user-id": "dd"
         }
     });
-    console.warn("First :- " + res.status);
+    console.warn("Second :- " + res.status);
 }, 1000);
 
 let operationWithoutLua = async (operationCount: number) => {
