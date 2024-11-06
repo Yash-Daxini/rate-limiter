@@ -13,24 +13,30 @@ export let testRequestRateLimit = async (apiUrl: string, headers: any, seconds: 
 
     let startTime = Date.now();
 
+    const REQUESTS_PER_SECOND = 100;
+    const INTERVAL_MS = 1000;
+
     for (let i = 1; i <= seconds; i++) {
         let acceptedRequests = 0;
         let rejectedRequests = 0;
-        let totalRequestsPerSecond = 0;
         let startTimeForCurrentSecond = Date.now();
-        while (Date.now() - startTime < i * 1000) {
-            let statusCode = await makeRequest(apiUrl, headers);
-            // if (Date.now() - startTime >= i * 1000) break;
+
+        const requests = Array.from({ length: REQUESTS_PER_SECOND }).map(async () => {
+            const statusCode = await makeRequest(apiUrl, headers);
             if (statusCode === 200) acceptedRequests++;
             else if (statusCode === 429) rejectedRequests++;
-            totalRequestsPerSecond++;
-        }
+        });
+
+        await Promise.all(requests);
+        await new Promise(resolve => setTimeout(resolve, Math.min(INTERVAL_MS - (Date.now() - startTimeForCurrentSecond), 0)));
+
         responses.push({
             second: (Date.now() - startTimeForCurrentSecond) / 1000,
-            totalRequestsPerSecond: totalRequestsPerSecond,
+            totalRequestsPerSecond: REQUESTS_PER_SECOND,
             acceptedRequests: acceptedRequests,
             rejectedRequests: rejectedRequests
         })
+        await new Promise(resolve => setTimeout(resolve, 1000));
     }
 
     let totalTime = (Date.now() - startTime) / 1000;
