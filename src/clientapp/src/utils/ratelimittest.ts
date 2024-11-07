@@ -13,7 +13,7 @@ export let testRequestRateLimit = async (apiUrl: string, headers: any, seconds: 
 
     let startTime = Date.now();
 
-    const REQUESTS_PER_SECOND = 100;
+    const REQUESTS_PER_SECOND = 50;
     const INTERVAL_MS = 1000;
 
     for (let i = 1; i <= seconds; i++) {
