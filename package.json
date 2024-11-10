@@ -34,6 +34,7 @@
     "test-service2": "npx jest -t \"service2\"",
     "test-service3": "npx jest -t \"service3\"",
     "test-entities": "npx jest -t \"entity\"",
-    "test-middleware": "npx jest -t \"middleware\""
+    "test-middleware": "npx jest -t \"middleware\"",
+    "dev":"npm --prefix ./src/clientapp run dev"
   }
 }
