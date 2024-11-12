@@ -26,10 +26,11 @@ app.get("/api/service1/burst", rateLimiterMiddleware(rateLimiterConfigForBurst),
 
 app.get("/api/service1/nonBurst/callservice3", async (req, res) => {
     let service3_domain = process.env.Service3_Domain || "localhost";
+    let headers: any = req.headers ? req.headers : {
+        'x-service-name': 'service1'
+    };
     let response = await fetch(`http://${service3_domain}:3002/api/service3/nonBurst`, {
-        headers: {
-            'x-service-name': 'service1'
-        }
+        headers: headers
     });
     let responseMessage = await response.json();
     res.status(response.status);
@@ -38,10 +39,11 @@ app.get("/api/service1/nonBurst/callservice3", async (req, res) => {
 
 app.get("/api/service1/burst/callservice3", async (req, res) => {
     let service3_domain = process.env.Service3_Domain || "localhost";
+    let headers: any = req.headers ? req.headers : {
+        'x-service-name': 'service1'
+    };
     let response = await fetch(`http://${service3_domain}:3002/api/service3/burst`, {
-        headers: {
-            'x-service-name': 'service1'
-        }
+        headers: headers
     });
     let responseMessage = await response.json();
     res.status(response.status);
