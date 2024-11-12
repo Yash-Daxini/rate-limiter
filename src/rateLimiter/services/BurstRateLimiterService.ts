@@ -33,7 +33,7 @@ export class BurstRateLimiterService implements IRateLimiterService {
 
                             currentBurstCapacity = math.min(currentBurstCapacity + (elapsedTimeInSeconds * maxRequestsPerSecond),burstCapacity)
 
-                            if(currentBurstCapacity > 1)
+                            if(currentBurstCapacity > 0)
                             then
                                 redis.call("SET",key,cjson.encode({
                                     burstCapacity = currentBurstCapacity - 1,
