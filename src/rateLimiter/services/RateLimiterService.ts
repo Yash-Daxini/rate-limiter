@@ -24,7 +24,7 @@ export const RateLimiterService = async (config: RateLimiterConfig, key: string 
 const handleNonBurstRateLimiter = async (config: RateLimiterConfig, key: string): Promise<boolean> => {
     const nonBurstRateLimiter = new NonBurstRateLimiter(config.maxRequestsPerSecond, config.rateLimitLevel);
 
-    const redisKey = `rate_limit_nonBurst:${key}`;
+    const redisKey = `rate-limit:nonBurst:${key}`;
 
     return await new NonBurstRateLimiterService().canAcceptRequest(nonBurstRateLimiter, redisKey);
 
@@ -33,7 +33,7 @@ const handleNonBurstRateLimiter = async (config: RateLimiterConfig, key: string)
 const handleBurstRateLimiter = async (config: RateLimiterConfig, key: string): Promise<boolean> => {
     const burstRateLimiter = new BurstRateLimiter(config.maxRequestsPerSecond, config.rateLimitLevel, config?.burstCapacity as number, config?.burstCapacityExpiryInSeconds as number);
 
-    const redisKey = `rate_limit_burst:${key}`;
+    const redisKey = `rate-limit:burst:${key}`;
 
     return await new BurstRateLimiterService().canAcceptRequest(burstRateLimiter, redisKey);
 };
